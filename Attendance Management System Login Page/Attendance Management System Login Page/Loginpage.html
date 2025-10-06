@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartRegister - Log In</title>
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8ff; /* light blue background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Container box */
+    .login-container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-container h1 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    /* Form */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      text-align: left;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+      color: #444;
+    }
+
+    input {
+      padding: 0.7rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    input:focus {
+      border-color: #007bff; /* blue focus for login */
+      outline: none;
+    }
+
+    /* Button */
+    button {
+      background: #007bff; /* blue for log in */
+      color: white;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    /* Links below */
+    .extra-links {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .extra-links a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .extra-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login box -->
+  <div class="login-container" role="main">
+    <h1>Log in to SmartRegister</h1>
+
+    <!-- Login form -->
+    <form aria-label="Login form">
+      <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required aria-required="true" />
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required aria-required="true" />
+      </div>
+
+      <button type="submit"><a href = "attendancepage.html" target = "_blank"> Log in </a></button>
+    </form>
+
+    <!-- Helpful links -->
+    <div class="extra-links">
+      <p><a href="#">Forgot password?</a></p>
+      <p>Don’t have an account? <a href="register.html">Sign up</a></p>
+    </div>
+  </div>
+</body>
+</html>
