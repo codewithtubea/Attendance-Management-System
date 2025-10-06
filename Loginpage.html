@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <Link ref ="stylesheet" href ="login.css">
+  <title>SmartRegister - Log In</title>
+</head>
+<body>
+  <!-- Login box -->
+  <div class="login-container" role="main">
+    <h1>Log in to Registration Portal</h1>
+
+    <!-- Login form -->
+    <form aria-label="Login form">
+      <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required aria-required="true" />
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required aria-required="true" />
+      </div>
+
+      <button type="submit"><a href = "attendancepage.html" target = "_blank"> Log in </a></button>
+    </form>
+
+    <!-- Helpful links -->
+    <div class="extra-links">
+      <p><a href="#">Forgot password?</a></p>
+      <p>Don’t have an account? <a href="register.html">Sign up</a></p>
+    </div>
+  </div>
+</body>
+</html>
