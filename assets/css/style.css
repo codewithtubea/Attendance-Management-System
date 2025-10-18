@@ -1,0 +1,104 @@
+/* General Layout */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+}
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+.sidebar {
+    width: 220px;
+    background-color: #b71c1c; /* deep red */
+    color: #fff;
+    padding: 20px;
+}
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+.sidebar ul li {
+    margin: 15px 0;
+}
+.sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+.main-content {
+    flex: 1;
+    padding: 30px;
+}
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.attendance-table th, .attendance-table td {
+    padding: 12px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+.attendance-table th {
+    background-color: #b71c1c;
+    color: #fff;
+}
+.btn {
+    background-color: #b71c1c;
+    color: #fff;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.error {
+    color: red;
+    margin-top: 10px;
+}
+
+/* Responsive handled via JS class toggle */
+.responsive .dashboard-container {
+    flex-direction: column;
+}
+/* Header */
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #b71c1c; /* deep red */
+    color: #fff;
+    padding: 15px 30px;
+}
+
+.site-header h1 {
+    margin: 0;
+    font-size: 1.8em;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-right .greeting {
+    font-weight: bold;
+}
+
+.header-right a {
+    color: #fff;
+    text-decoration: none;
+    background-color: #fff0;
+    border: 1px solid #fff;
+    padding: 6px 12px;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+.header-right a:hover {
+    background-color: #fff;
+    color: #b71c1c;
+}
