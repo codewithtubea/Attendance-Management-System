@@ -1,158 +1,205 @@
-/* ---------------------------
-   Data fetching & UI binding
-   --------------------------- */
-
-/*
-  The dashboard will try to fetch real data from:
-    /api/getAttendance  (example)
-  If that fails (no server yet), it uses fallback mock data so UI works now.
-  For Activity 03 you will replace the endpoint with your PHP script URL.
-*/
-
-const API_ENDPOINT = '/api/getAttendance'; // replace with real endpoint when available
-
-// --- mock data (used if fetch fails) ---
-const mockData = {
-  student: { name: "Tracy", id: "S12345" },
-  stats: { total: 12, attended: 11, missed: 1, upcoming: 2 },
-  sessions: [
-    { date: "2025-10-02", title: "Intro to Web Tech", type: "Lecture", status: "Present", note: "" },
-    { date: "2025-10-04", title: "Web Lab 1", type: "Lab", status: "Absent", note: "Bring Arduino kit" },
-    { date: "2025-10-06", title: "Data Structures", type: "Lecture", status: "Present", note: "" },
-    { date: "2025-10-09", title: "Database Lab", type: "Lab", status: "Present", note: "SQL practice" }
-  ]
-};
-
-// util to format date nicely
-function friendlyDate(d){
-  const dt = new Date(d);
-  return dt.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
-}
-
-async function loadAttendance(){
-  let data = null;
-  try {
-    const res = await fetch(API_ENDPOINT, {cache:'no-store'});
-    if (!res.ok) throw new Error('No server data');
-    data = await res.json();
-  } catch(err){
-    // fallback to mock data if fetch fails
-    data = mockData;
-  }
-  bindDataToUI(data);
-}
-
-function bindDataToUI(data){
-  // header / hero
-  document.querySelector('.hero-left h1').textContent = `Welcome back, ${data.student?.name || 'Student'} 👋`;
-
-  // stats
-  document.getElementById('totalSessions').textContent = data.stats.total;
-  document.getElementById('attendedCount').textContent = data.stats.attended;
-  document.getElementById('missedCount').textContent = data.stats.missed;
-  document.getElementById('upcomingCount').textContent = data.stats.upcoming;
-
-  // attendance pct and progress bar
-  const pct = Math.round((data.stats.attended / Math.max(1, data.stats.total)) * 100);
-  document.getElementById('attendancePct').textContent = `${pct}%`;
-  const progressBar = document.getElementById('progressBar');
-  if (progressBar) progressBar.setAttribute('stroke-dasharray', `${pct},100`);
-
-  // recent sessions
-  const recentScroll = document.getElementById('recentScroll');
-  recentScroll.innerHTML = '';
-  data.sessions.forEach(s => {
-    const card = document.createElement('div');
-    card.className = 'session-card';
-    const html = `
-      <strong>${s.title}</strong>
-      <div class="muted">${friendlyDate(s.date)}</div>
-      <div class="meta">
-        <div class="badges">
-          <span class="badge ${s.type.toLowerCase() === 'lab' ? 'lab' : 'lecture'}">${s.type}</span>
-          <span class="muted" style="margin-left:8px">${s.status}</span>
-        </div>
-        <div><small class="muted">${s.note || ''}</small></div>
-      </div>
-    `;
-    card.innerHTML = html;
-    recentScroll.appendChild(card);
-  });
-}
-
-/* ---------------------------
-   UI interactions
-   --------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  loadAttendance();
-
-  // sidebar collapse
-  const sidebar = document.getElementById('sidebar');
-  const collapseBtn = document.getElementById('collapseBtn');
-  collapseBtn?.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-
-  // nav switching (content sections)
-  document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-      btn.classList.add('active');
-      const target = btn.dataset.target;
-      if (!target) return;
-      // show/hide content sections by id
-      document.querySelectorAll('.content').forEach(sec => {
-        sec.hidden = sec.id !== target;
-      });
+document.addEventListener('DOMContentLoaded', function() {
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const collapseBtn = document.getElementById('collapseBtn');
+    
+    if (collapseBtn && sidebar) {
+        collapseBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            collapseBtn.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+        });
+    }
+    
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+    }
+    
+    // Modal functionality
+    const modals = document.querySelectorAll('.modal');
+    const openModalButtons = document.querySelectorAll('[data-modal-open]');
+    const closeModalButtons = document.querySelectorAll('[data-modal-close]');
+    
+    openModalButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modalId = this.dataset.modalOpen;
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        });
     });
-  });
-
-  // open/close modal
-  const reportBtn = document.getElementById('reportIssueBtn');
-  const modal = document.getElementById('issueModal');
-  const closeModal = document.getElementById('closeModal');
-  const cancelIssue = document.getElementById('cancelIssue');
-  const issueForm = document.getElementById('issueForm');
-
-  reportBtn?.addEventListener('click', () => {
-    modal.style.display = 'flex';
-    modal.setAttribute('aria-hidden', 'false');
-  });
-  closeModal?.addEventListener('click', closeIssueModal);
-  cancelIssue?.addEventListener('click', closeIssueModal);
-  window.addEventListener('click', (ev) => { if (ev.target === modal) closeIssueModal(); });
-
-  function closeIssueModal(){
-    modal.style.display = 'none';
-    modal.setAttribute('aria-hidden','true');
-  }
-
-  // issue form submit (simulate send)
-  issueForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    // collect fields
-    const payload = {
-      course: document.getElementById('issueCourse').value,
-      date: document.getElementById('issueDate').value,
-      message: document.getElementById('issueMessage').value
-    };
-
-    // show success toast
-    showToast('✅ Attendance issue submitted. We will review it.');
-
-    // In Activity 03 you will POST to a server endpoint e.g.
-    // fetch('/api/reportIssue', {method:'POST', body: JSON.stringify(payload), headers:{'Content-Type':'application/json'}})
-
-    issueForm.reset();
-    closeIssueModal();
-  });
+    
+    closeModalButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+    
+    // Close modal on outside click
+    modals.forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+    
+    // Form validation
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+            }
+            
+            // CSRF token validation
+            const csrfInput = this.querySelector('input[name="csrf_token"]');
+            if (csrfInput && !validateCSRFToken(csrfInput.value)) {
+                e.preventDefault();
+                showAlert('Security token invalid. Please refresh the page.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Submit';
+                }
+            }
+        });
+    });
+    
+    // Password toggle
+    const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+    togglePasswordButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                this.textContent = 'Show';
+            }
+        });
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(function() {
+            const searchTerm = this.value.toLowerCase();
+            const courseCards = document.querySelectorAll('.course-card');
+            
+            courseCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }, 300));
+    }
+    
+    // Status update animations
+    const statusElements = document.querySelectorAll('.status-update');
+    statusElements.forEach(element => {
+        element.addEventListener('click', function() {
+            const originalText = this.textContent;
+            this.textContent = 'Updating...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                this.textContent = 'Updated!';
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.disabled = false;
+                }, 1500);
+            }, 1000);
+        });
+    });
+    
+    // Copy to clipboard
+    const copyButtons = document.querySelectorAll('[data-copy]');
+    copyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const textToCopy = this.dataset.copy;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = this.textContent;
+                this.textContent = 'Copied!';
+                setTimeout(() => {
+                    this.textContent = originalText;
+                }, 2000);
+            });
+        });
+    });
+    
+    // Auto-hide alerts
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }, 5000);
+    });
 });
 
-/* simple toast */
-function showToast(text){
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = text;
-  Object.assign(t.style, {position:'fixed',right:'18px',bottom:'28px',background:'var(--red-1)',color:'#fff',padding:'10px 14px',borderRadius:'8px',boxShadow:'0 6px 18px rgba(0,0,0,0.12)'});
-  document.body.appendChild(t);
-  setTimeout(()=> t.style.opacity = '0', 2200);
-  setTimeout(()=> t.remove(), 2600);
+// Utility functions
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func.apply(this, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function validateCSRFToken(token) {
+    // This would normally validate against a stored token
+    // For simplicity, we'll assume it's valid if it exists
+    return token && token.length === 64;
+}
+
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${type}`;
+    alertDiv.textContent = message;
+    
+    const container = document.querySelector('.content') || document.body;
+    container.prepend(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.style.opacity = '0';
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 5000);
+}
+
+// AJAX helper
+function makeRequest(url, options = {}) {
+    const defaultOptions = {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    };
+    
+    return fetch(url, { ...defaultOptions, ...options })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Request failed:', error);
+            showAlert('Request failed. Please try again.', 'error');
+        });
 }
